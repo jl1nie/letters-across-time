@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import PasswordGate from "@/components/PasswordGate";
 
 export default function Home() {
   return (
+    <PasswordGate>
     <main className="flex flex-1 flex-col items-center justify-center px-8 py-24 text-center">
       <motion.p
         initial={{ opacity: 0, y: 12 }}
@@ -54,5 +56,6 @@ export default function Home() {
         </Link>
       </motion.div>
     </main>
+    </PasswordGate>
   );
 }
