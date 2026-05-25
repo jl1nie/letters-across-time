@@ -28,6 +28,27 @@ body {
   font-weight: 300;
   letter-spacing: 0.02em;
   line-height: 2;
+  /* 日本語の単語途中での改行を抑える（手紙→「手」「紙」のような分断を防ぐ） */
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2,
+h3,
+p,
+span,
+button,
+a {
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+/* SVG内のテキストは禁則処理の影響を受けないが、念のため */
+svg text {
+  word-break: keep-all;
 }
 
 ::selection {

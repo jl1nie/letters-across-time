@@ -19,22 +19,24 @@ export default function Home() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 2.0, ease: "easeOut", delay: 0.9 }}
-        className="text-3xl sm:text-4xl font-light leading-[2.2] tracking-[0.1em]"
+        className="text-2xl sm:text-4xl font-light leading-[2.2] tracking-[0.1em] max-w-[16em]"
       >
-        3年前のあなたへ、
-        <br />
-        と書ける場所。
+        <span className="inline-block">3年前のあなたへ、</span>
+        <br className="hidden sm:inline" />
+        <span className="inline-block">と書ける場所。</span>
       </motion.h1>
 
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2.0, ease: "easeOut", delay: 2.4 }}
-        className="mt-16 max-w-sm text-sm leading-[2.2] text-[color:var(--muted)]"
+        className="mt-16 max-w-[20em] text-sm leading-[2.2] text-[color:var(--muted)] px-2"
       >
-        年齢の近い先輩が、3年前の自分に宛てて書いた手紙。
+        <span className="inline-block">年齢の近い先輩が、</span>
+        <span className="inline-block">3年前の自分に宛てて書いた手紙。</span>
         <br />
-        いま選ぼうとしている、あなたへ。
+        <span className="inline-block">いま選ぼうとしている、</span>
+        <span className="inline-block">あなたへ。</span>
       </motion.p>
 
       <motion.div

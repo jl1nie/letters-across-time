@@ -12,16 +12,17 @@ type Props = {
 };
 
 export function ConnectionGraph({ ranked, userLabel }: Props) {
-  const W = 720;
-  const H = 460;
+  // viewBox は小さめにして、SVG 内のテキスト/ノードを相対的に大きくする
+  const W = 480;
+  const H = 380;
   const cx = W / 2;
   const cy = H / 2;
 
   const top = ranked.slice(0, 7);
   const nodes = top.map((r, i) => {
-    // 決定論的配置: スコアが高いほど中心に近く、角度は等分
     const angle = (i / top.length) * Math.PI * 2 - Math.PI / 2;
-    const radius = 90 + (1 - r.score) * 130; // 90〜220
+    // モバイルでもラベルが衝突しにくいよう半径を広めに
+    const radius = 80 + (1 - r.score) * 95;
     return {
       ...r,
       x: cx + Math.cos(angle) * radius,
@@ -45,7 +46,7 @@ export function ConnectionGraph({ ranked, userLabel }: Props) {
             } ${n.x} ${n.y}`}
             fill="none"
             stroke="#bcb39a"
-            strokeWidth={0.4 + n.score * 1.0}
+            strokeWidth={0.8 + n.score * 1.4}
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 0.75 }}
             transition={{
@@ -62,22 +63,22 @@ export function ConnectionGraph({ ranked, userLabel }: Props) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.0, ease: "easeOut" }}
         >
-          <circle cx={cx} cy={cy} r={6} fill="#2b2823" />
+          <circle cx={cx} cy={cy} r={9} fill="#2b2823" />
           <circle
             cx={cx}
             cy={cy}
-            r={14}
+            r={20}
             fill="none"
             stroke="#2b2823"
-            strokeOpacity={0.25}
+            strokeOpacity={0.2}
           />
           <text
             x={cx}
-            y={cy + 32}
+            y={cy + 42}
             textAnchor="middle"
-            fontSize={11}
+            fontSize={17}
             fill="#2b2823"
-            letterSpacing="0.2em"
+            letterSpacing="0.15em"
           >
             {userLabel}
           </text>
@@ -96,39 +97,37 @@ export function ConnectionGraph({ ranked, userLabel }: Props) {
                 <circle
                   cx={n.x}
                   cy={n.y}
-                  r={5}
+                  r={7}
                   fill={
                     n.letter.message.judgment === "good_job"
                       ? "#7a8c7f"
                       : "#b68a6a"
                   }
                 />
+                {/* タップしやすいよう透明ヒットエリア */}
                 <circle
                   cx={n.x}
                   cy={n.y}
-                  r={11}
+                  r={22}
                   fill="transparent"
-                  stroke="currentColor"
-                  strokeOpacity={0}
-                  className="hover:[stroke-opacity:0.2]"
                 />
                 <text
                   x={n.x}
-                  y={n.y - 14}
+                  y={n.y - 18}
                   textAnchor="middle"
-                  fontSize={10}
+                  fontSize={16}
                   fill="#5a564e"
-                  letterSpacing="0.15em"
+                  letterSpacing="0.08em"
                 >
-                  {n.letter.profile.age}・{n.letter.profile.occupation}
+                  {n.letter.profile.age}・{shortenOccupation(n.letter.profile.occupation)}
                 </text>
                 <text
                   x={n.x}
-                  y={n.y + 20}
+                  y={n.y + 28}
                   textAnchor="middle"
-                  fontSize={9}
+                  fontSize={14}
                   fill="#8a8377"
-                  letterSpacing="0.2em"
+                  letterSpacing="0.15em"
                 >
                   {n.letter.decision.event}
                 </text>
@@ -139,4 +138,10 @@ export function ConnectionGraph({ ranked, userLabel }: Props) {
       </svg>
     </div>
   );
+}
+
+// 長い職業名は省略してラベルの見やすさを保つ
+function shortenOccupation(name: string): string {
+  if (name.length <= 8) return name;
+  return name.slice(0, 7) + "…";
 }
