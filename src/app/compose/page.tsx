@@ -29,23 +29,37 @@ const occOptions: OccCat[] = [
 
 const eventOptions = ["転職", "結婚", "出産", "独立", "進学", "留学", "その他"];
 
+type GenderChoice = "f" | "m" | "x"; // x = 答えない（マッチングに使わない）
+const genderOptions: { value: GenderChoice; label: string }[] = [
+  { value: "f", label: "女性" },
+  { value: "m", label: "男性" },
+  { value: "x", label: "答えない" },
+];
+
+const TOTAL_STEPS = 5;
+
 export default function ComposePage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [age, setAge] = useState<number | null>(null);
   const [occupation, setOccupation] = useState<OccCat | null>(null);
+  const [gender, setGender] = useState<GenderChoice | null>(null);
   const [event, setEvent] = useState<string | null>(null);
   const [theme, setTheme] = useState("");
 
   const next = () => setStep((s) => s + 1);
 
   const submit = () => {
-    const payload = {
+    const payload: Record<string, string> = {
       age: String(age ?? 33),
       occ: occupation ?? "その他",
       event: event ?? "その他",
       theme,
     };
+    // 「答えない」を選んだら gender はマッチングに使わないので URL にも載せない
+    if (gender === "f" || gender === "m") {
+      payload.gender = gender;
+    }
     console.debug("[compose] submit", payload);
     const q = new URLSearchParams(payload);
     router.push(`/letters?${q.toString()}`);
@@ -61,7 +75,7 @@ export default function ComposePage() {
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-md">
         <p className="text-xs tracking-[0.3em] text-[color:var(--muted)] mb-16 text-center">
-          STEP {step + 1} / 4
+          STEP {step + 1} / {TOTAL_STEPS}
         </p>
 
         <AnimatePresence mode="wait">
@@ -123,6 +137,42 @@ export default function ComposePage() {
 
           {step === 2 && (
             <motion.section
+              key="gender"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 1.0, ease: "easeOut" }}
+            >
+              <h2 className="text-xl font-light leading-[2] tracking-[0.08em] mb-4">
+                よろしければ、性別を。
+              </h2>
+              <p className="text-xs text-[color:var(--muted)] mb-12 leading-[2]">
+                同じ立場の先輩を見つけやすくするためにだけ使います。
+                <br />
+                「答えない」も選べます。
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {genderOptions.map((g) => (
+                  <button
+                    key={g.value}
+                    onClick={() => setGender(g.value)}
+                    className={`text-sm px-5 py-2 border rounded-sm transition-colors ${
+                      gender === g.value
+                        ? "border-[color:var(--foreground)] bg-[color:var(--foreground)] text-[color:var(--background)]"
+                        : "border-[color:var(--rule)] hover:border-[color:var(--foreground)]"
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+              <Forward enabled={!!gender} onClick={next} />
+            </motion.section>
+          )}
+
+          {step === 3 && (
+            <motion.section
               key="event"
               variants={stepVariants}
               initial="initial"
@@ -152,7 +202,7 @@ export default function ComposePage() {
             </motion.section>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <motion.section
               key="theme"
               variants={stepVariants}
@@ -162,9 +212,9 @@ export default function ComposePage() {
               transition={{ duration: 1.0, ease: "easeOut" }}
             >
               <h2 className="text-xl font-light leading-[2] tracking-[0.08em] mb-12">
-                いちばん、迷っていることを
+                <span className="inline-block">いちばん、迷っていることを</span>
                 <br />
-                ひとことで。
+                <span className="inline-block">ひとことで。</span>
               </h2>
               <textarea
                 value={theme}
@@ -173,7 +223,11 @@ export default function ComposePage() {
                 placeholder="例：いまの会社に残るか、別の道に進むか。"
                 className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-base py-3 resize-none leading-[2]"
               />
-              <Forward enabled={theme.trim().length > 0} onClick={submit} label="手紙を受け取る" />
+              <Forward
+                enabled={theme.trim().length > 0}
+                onClick={submit}
+                label="手紙を受け取る"
+              />
             </motion.section>
           )}
         </AnimatePresence>

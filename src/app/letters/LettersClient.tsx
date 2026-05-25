@@ -35,10 +35,12 @@ export function LettersClient() {
   const occRaw = sp.get("occ");
   const evRaw = sp.get("event");
   const theme = sp.get("theme") ?? "";
+  const genderRaw = sp.get("gender");
+  const gender: "f" | "m" | undefined =
+    genderRaw === "f" || genderRaw === "m" ? genderRaw : undefined;
 
   if (typeof window !== "undefined") {
-    // デバッグ: 受け取ったパラメータをDevToolsで確認できるように
-    console.debug("[letters] params", { age, occRaw, evRaw, theme });
+    console.debug("[letters] params", { age, occRaw, evRaw, theme, gender });
   }
 
   const occ: UserProfile["occupationCategory"] =
@@ -55,6 +57,7 @@ export function LettersClient() {
     occupationCategory: occ,
     decisionTheme: ev,
     decisionText: theme,
+    gender,
   };
 
   const ranked = rankBySimilarity(user, senpai);
