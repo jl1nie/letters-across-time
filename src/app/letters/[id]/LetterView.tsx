@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Envelope } from "@/components/Envelope";
 import { Typewriter } from "@/components/Typewriter";
 import type { Letter } from "@/data/senpai";
+import { displayedAge, getUserAge } from "@/lib/displayAge";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
 
@@ -19,6 +20,11 @@ export function LetterView({
   const [opened, setOpened] = useState(false);
   const [revealLetter, setRevealLetter] = useState(false);
   const [bodyDone, setBodyDone] = useState(false);
+  const [shownAge, setShownAge] = useState<number>(letter.profile.age);
+
+  useEffect(() => {
+    setShownAge(displayedAge(letter.id, getUserAge(letter.profile.age - 3)));
+  }, [letter.id, letter.profile.age]);
 
   useEffect(() => {
     if (!opened) return;
@@ -49,7 +55,7 @@ export function LetterView({
             className="flex flex-col items-center mt-16 gap-12"
           >
             <p className="text-xs tracking-[0.3em] text-[color:var(--muted)]">
-              {letter.profile.age}歳・{letter.profile.occupation}・
+              {shownAge}歳・{letter.profile.occupation}・
               {genderLabel[letter.profile.gender]}
             </p>
             <Envelope opened={opened} onOpen={() => setOpened(true)} />
@@ -67,7 +73,7 @@ export function LetterView({
                 3年前のわたしへ
               </p>
               <p className="mt-3 text-sm text-[color:var(--muted)]">
-                {letter.profile.age}歳・{letter.profile.occupation}・
+                {shownAge}歳・{letter.profile.occupation}・
                 {genderLabel[letter.profile.gender]}
               </p>
               <p className="mt-6 text-[15px] leading-[2.2]">

@@ -2,10 +2,12 @@
 
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import { senpai, type Letter } from "@/data/senpai";
 import { rankBySimilarity, type UserProfile } from "@/lib/similarity";
 import { ConnectionGraph } from "@/components/ConnectionGraph";
 import { LetterCard } from "@/components/LetterCard";
+import { displayedAge, setUserAge } from "@/lib/displayAge";
 
 const validOcc: UserProfile["occupationCategory"][] = [
   "デザイン",
@@ -60,7 +62,17 @@ export function LettersClient() {
     gender,
   };
 
-  const ranked = rankBySimilarity(user, senpai);
+  const ranked = rankBySimilarity(user, senpai).map(({ letter, score }) => ({
+    letter: {
+      ...letter,
+      profile: { ...letter.profile, age: displayedAge(letter.id, age) },
+    },
+    score,
+  }));
+
+  useEffect(() => {
+    setUserAge(age);
+  }, [age]);
 
   return (
     <main className="flex flex-1 flex-col px-6 py-20">
