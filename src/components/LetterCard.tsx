@@ -30,7 +30,7 @@ export function LetterCard({ letter, index }: { letter: Letter; index: number })
               color: isGood ? "var(--accent-good)" : "var(--accent-thought)",
             }}
           >
-            {isGood ? "GOOD JOB" : "NEEDS MORE THOUGHT"}
+            {isGood ? "あれでよかった" : "もう少し考えても"}
           </span>
         </div>
         <p className="text-[15px] leading-[2.2]">

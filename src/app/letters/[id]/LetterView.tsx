@@ -118,7 +118,7 @@ export function LetterView({
                         : "var(--accent-thought)",
                     }}
                   >
-                    {isGood ? "GOOD JOB" : "NEEDS MORE THOUGHT"}
+                    {isGood ? "あれでよかった" : "もう少し考えても"}
                   </span>
 
                   <Link
