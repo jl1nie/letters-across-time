@@ -19,17 +19,13 @@ async function sha256(input: string): Promise<string> {
 }
 
 export default function PasswordGate({ children }: { children: React.ReactNode }) {
-  const [unlocked, setUnlocked] = useState<boolean | null>(null);
+  const [unlocked, setUnlocked] = useState(false);
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    setUnlocked(sessionStorage.getItem(STORAGE_KEY) === "1");
+    if (sessionStorage.getItem(STORAGE_KEY) === "1") setUnlocked(true);
   }, []);
-
-  if (unlocked === null) {
-    return <main className="flex flex-1" />;
-  }
 
   if (unlocked) {
     return <>{children}</>;
