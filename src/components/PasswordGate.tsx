@@ -49,7 +49,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="text-[color:var(--muted)] text-xs tracking-[0.4em] mb-16 uppercase"
+        className="text-[color:var(--muted)] text-xl tracking-[0.4em] mb-16"
       >
         ふ、と
       </motion.p>

@@ -12,7 +12,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.6, ease: "easeOut", delay: 0.3 }}
-        className="text-[color:var(--muted)] text-xs tracking-[0.4em] mb-16"
+        className="text-[color:var(--muted)] text-xl tracking-[0.4em] mb-16"
       >
         ふ、と
       </motion.p>
