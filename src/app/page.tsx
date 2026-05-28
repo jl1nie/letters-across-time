@@ -21,7 +21,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 2.0, ease: "easeOut", delay: 0.9 }}
-        className="text-2xl sm:text-4xl font-light leading-[2.2] tracking-[0.1em] max-w-[16em]"
+        className="text-lg sm:text-2xl font-light leading-[2.2] tracking-[0.1em] max-w-[16em]"
       >
         <span className="inline-block">3年前のあなたから届く、</span>
         <br className="hidden sm:inline" />
