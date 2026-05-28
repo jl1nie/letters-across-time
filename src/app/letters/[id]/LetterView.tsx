@@ -10,21 +10,65 @@ import { displayedAge, getUserAge } from "@/lib/displayAge";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
 
-function DialogueRequest() {
+function DialogueRequest({ letter }: { letter: Letter }) {
   const [open, setOpen] = useState(false);
   const [situation, setSituation] = useState("");
   const [sent, setSent] = useState(false);
+  const [batonReady, setBatonReady] = useState(false);
+
+  useEffect(() => {
+    if (!sent) return;
+    const t = setTimeout(() => setBatonReady(true), 2200);
+    return () => clearTimeout(t);
+  }, [sent]);
+
+  const batonMessage = letter.message.judgment === "good_job"
+    ? "あなたの話を聞いて、少し似た道を歩いた気がしました。このバトンが、何かのヒントになれば。"
+    : "迷いながら選んだことも、やがて経験になる。そのことを、あなたにも伝えたくて。";
+
+  const batonHref = `/baton?from=${letter.id}&message=${encodeURIComponent(batonMessage)}`;
 
   if (sent) {
     return (
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.0 }}
-        className="text-xs tracking-[0.25em] text-[color:var(--muted)] text-center pt-4"
-      >
-        リクエストが届きました。担当者よりご連絡します。
-      </motion.p>
+      <div className="w-full flex flex-col items-center gap-10">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.0 }}
+          className="text-xs tracking-[0.25em] text-[color:var(--muted)] text-center"
+        >
+          リクエストが届きました。担当者よりご連絡します。
+        </motion.p>
+
+        <AnimatePresence>
+          {batonReady && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.4, ease: "easeOut" }}
+              className="w-full border-t border-[color:var(--rule)] pt-10 flex flex-col items-center gap-6 text-center"
+            >
+              <p className="text-xs tracking-[0.35em] text-[color:var(--muted)]">
+                バトンが届きました
+              </p>
+              <p className="text-[15px] leading-[2.2]">
+                {letter.profile.occupation}・{letter.profile.age}歳の
+                <br />
+                あの方から。
+              </p>
+              <Link
+                href={batonHref}
+                className="group mt-2 text-sm tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors"
+              >
+                バトンを受け取る
+                <span className="ml-3 transition-transform group-hover:translate-x-1 inline-block">
+                  →
+                </span>
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     );
   }
 
@@ -196,7 +240,7 @@ export function LetterView({
                     </span>
                   </Link>
 
-                  <DialogueRequest />
+                  <DialogueRequest letter={letter} />
                 </motion.div>
               )}
             </AnimatePresence>
