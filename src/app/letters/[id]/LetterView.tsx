@@ -136,8 +136,6 @@ export function LetterView({
     return () => clearTimeout(t);
   }, [opened]);
 
-  const isGood = letter.message.judgment === "good_job";
-
   return (
     <main className="flex flex-1 flex-col items-center px-6 py-20">
       <Link
@@ -216,20 +214,6 @@ export function LetterView({
                   transition={{ duration: 1.4, ease: "easeOut", delay: 0.4 }}
                   className="mt-16 flex flex-col items-center gap-12"
                 >
-                  <span
-                    className="inline-block text-xs tracking-[0.4em] px-6 py-3 border"
-                    style={{
-                      color: isGood
-                        ? "var(--accent-good)"
-                        : "var(--accent-thought)",
-                      borderColor: isGood
-                        ? "var(--accent-good)"
-                        : "var(--accent-thought)",
-                    }}
-                  >
-                    {isGood ? "あれでよかった" : "もう少し考えても"}
-                  </span>
-
                   <Link
                     href={`/letters/${nextId}`}
                     className="group text-sm tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors"
