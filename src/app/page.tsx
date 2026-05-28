@@ -12,9 +12,9 @@ export default function Home() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.6, ease: "easeOut", delay: 0.3 }}
-        className="text-[color:var(--muted)] text-xs tracking-[0.4em] mb-16 uppercase"
+        className="text-[color:var(--muted)] text-xs tracking-[0.4em] mb-16"
       >
-        Letters Across Time
+        ふ、と
       </motion.p>
 
       <motion.h1
@@ -23,9 +23,9 @@ export default function Home() {
         transition={{ duration: 2.0, ease: "easeOut", delay: 0.9 }}
         className="text-2xl sm:text-4xl font-light leading-[2.2] tracking-[0.1em] max-w-[16em]"
       >
-        <span className="inline-block">3年前のあなたへ、</span>
+        <span className="inline-block">3年前のあなたから届く、</span>
         <br className="hidden sm:inline" />
-        <span className="inline-block">と書ける場所。</span>
+        <span className="inline-block">人生のバトン。</span>
       </motion.h1>
 
       <motion.p
@@ -34,11 +34,11 @@ export default function Home() {
         transition={{ duration: 2.0, ease: "easeOut", delay: 2.4 }}
         className="mt-16 max-w-[20em] text-sm leading-[2.2] text-[color:var(--muted)] px-2"
       >
-        <span className="inline-block">年齢の近い先輩が、</span>
-        <span className="inline-block">3年前の自分に宛てて書いた手紙。</span>
+        <span className="inline-block">少し先を歩く誰かの、</span>
+        <span className="inline-block">選んだ道と選ばなかった道。</span>
         <br />
-        <span className="inline-block">いま選ぼうとしている、</span>
-        <span className="inline-block">あなたへ。</span>
+        <span className="inline-block">答えではなく、</span>
+        <span className="inline-block">余白に出会う場所。</span>
       </motion.p>
 
       <motion.div

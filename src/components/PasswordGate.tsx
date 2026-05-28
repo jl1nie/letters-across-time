@@ -51,7 +51,7 @@ export default function PasswordGate({ children }: { children: React.ReactNode }
         transition={{ duration: 1.2, ease: "easeOut" }}
         className="text-[color:var(--muted)] text-xs tracking-[0.4em] mb-16 uppercase"
       >
-        Letters Across Time
+        ふ、と
       </motion.p>
 
       <motion.p
