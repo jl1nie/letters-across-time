@@ -1,8 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
+import { senpai } from "@/data/senpai";
 
 type OccCat =
   | "デザイン"
@@ -73,6 +75,9 @@ export default function ComposePage() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-24">
+      <Suspense fallback={null}>
+        <BatonContext />
+      </Suspense>
       <div className="w-full max-w-md">
         <p className="text-xs tracking-[0.3em] text-[color:var(--muted)] mb-16 text-center">
           STEP {step + 1} / {TOTAL_STEPS}
@@ -233,6 +238,30 @@ export default function ComposePage() {
         </AnimatePresence>
       </div>
     </main>
+  );
+}
+
+function BatonContext() {
+  const params = useSearchParams();
+  const batonId = params.get("baton");
+  const letter = batonId ? senpai.find((l) => l.id === batonId) : null;
+
+  if (!letter) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1.2, ease: "easeOut" }}
+      className="w-full max-w-md mb-12 border-l-2 border-[color:var(--rule)] pl-6 py-2"
+    >
+      <p className="text-xs tracking-[0.3em] text-[color:var(--muted)] mb-2">
+        バトンを受け取ったあなたへ
+      </p>
+      <p className="text-sm leading-[2] text-[color:var(--muted)]">
+        {letter.profile.occupation}・{letter.profile.age}歳のあの方から。
+      </p>
+    </motion.div>
   );
 }
 

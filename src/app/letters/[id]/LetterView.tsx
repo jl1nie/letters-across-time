@@ -10,6 +10,65 @@ import { displayedAge, getUserAge } from "@/lib/displayAge";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
 
+function DialogueRequest() {
+  const [open, setOpen] = useState(false);
+  const [situation, setSituation] = useState("");
+  const [sent, setSent] = useState(false);
+
+  if (sent) {
+    return (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.0 }}
+        className="text-xs tracking-[0.25em] text-[color:var(--muted)] text-center pt-4"
+      >
+        リクエストが届きました。担当者よりご連絡します。
+      </motion.p>
+    );
+  }
+
+  return (
+    <div className="w-full border-t border-[color:var(--rule)] pt-12 flex flex-col items-center gap-6">
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="text-xs tracking-[0.3em] text-[color:var(--muted)] hover:text-[color:var(--foreground)] transition-colors"
+        >
+          この方と話してみる →
+        </button>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full flex flex-col gap-6"
+        >
+          <p className="text-xs tracking-[0.25em] text-[color:var(--muted)]">
+            今のあなたの状況を、少しだけ教えてください。
+          </p>
+          <textarea
+            value={situation}
+            onChange={(e) => setSituation(e.target.value)}
+            rows={4}
+            placeholder="例：転職を考えているが、子どものことも気になっている。"
+            className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-sm py-3 resize-none leading-[2]"
+          />
+          <div className="flex justify-end">
+            <button
+              disabled={situation.trim().length === 0}
+              onClick={() => setSent(true)}
+              className="text-xs tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+            >
+              送る →
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
 export function LetterView({
   letter,
   nextId,
@@ -136,6 +195,8 @@ export function LetterView({
                       →
                     </span>
                   </Link>
+
+                  <DialogueRequest />
                 </motion.div>
               )}
             </AnimatePresence>
