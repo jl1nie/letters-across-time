@@ -31,7 +31,7 @@ export function BatonClient() {
     );
   }
 
-  const composeHref = `/compose?baton=${letter.id}`;
+  const composeHref = `/write?baton=${letter.id}`;
 
   return (
     <main className="flex flex-1 flex-col items-center px-6 py-20">
