@@ -70,7 +70,6 @@ export function WriteClient() {
   const [didntChoose, setDidntChoose] = useState("");
   const [afterwards, setAfterwards] = useState("");
   const [body, setBody] = useState("");
-  const [judgment, setJudgment] = useState<"good_job" | "needs_thought" | null>(null);
   const [done, setDone] = useState(false);
 
   const next = () => setStep((s) => s + 1);
@@ -248,23 +247,7 @@ export function WriteClient() {
                 placeholder="あのとき、眠れずに過ごしていたあなたへ。&#13;&#10;大丈夫、行って良かったよ。"
                 className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-base py-3 resize-none leading-[2]"
               />
-              <div className="mt-10 flex flex-col gap-4">
-                <p className="text-xs tracking-[0.25em] text-[color:var(--muted)]">
-                  いま振り返って
-                </p>
-                <div className="flex gap-4">
-                  {[
-                    { value: "good_job" as const, label: "あれでよかった" },
-                    { value: "needs_thought" as const, label: "もう少し考えても" },
-                  ].map((j) => (
-                    <button key={j.value} onClick={() => setJudgment(j.value)}
-                      className={`text-sm px-5 py-2 border rounded-sm transition-colors ${judgment === j.value ? "border-[color:var(--foreground)] bg-[color:var(--foreground)] text-[color:var(--background)]" : "border-[color:var(--rule)] hover:border-[color:var(--foreground)]"}`}>
-                      {j.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <Forward enabled={body.trim().length > 0 && !!judgment} onClick={submit} label="送る" />
+              <Forward enabled={body.trim().length > 0} onClick={submit} label="送る" />
             </motion.section>
           )}
         </AnimatePresence>
