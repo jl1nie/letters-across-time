@@ -24,7 +24,7 @@ function DialogueRequest({ letter }: { letter: Letter }) {
 
   const batonMessage = letter.message.judgment === "good_job"
     ? "あなたの話を聞いて、少し似た道を歩いた気がしました。このバトンが、何かのヒントになれば。"
-    : "迷いながら選んだことも、やがて経験になる。そのことを、あなたにも伝えたくて。";
+    : "もう少しだけ待てたら良かった、と今なら言える。焦らなくていいと、あなたに届けたくて。";
 
   const batonHref = `/baton?from=${letter.id}&message=${encodeURIComponent(batonMessage)}`;
 
