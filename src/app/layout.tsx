@@ -10,8 +10,8 @@ const notoSerifJp = Noto_Serif_JP({
 });
 
 export const metadata: Metadata = {
-  title: "3年前のあなたへ",
-  description: "似た境遇の先輩が、3年前の自分宛てに書いた手紙を届けます。",
+  title: "ふ、と",
+  description: "少し先を歩く誰かの経験と出会い、自分の選択を自分の手に取り戻す。",
 };
 
 export default function RootLayout({
