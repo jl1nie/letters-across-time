@@ -119,8 +119,18 @@ final = 0.55 * cosineSim
   - 状況入力 → 送信（モック: UI のみ、実際には送信しない）
 - **バトン受け取りページ** (`src/app/baton/page.tsx`)
   - URL: `/baton?from=k01&message=...`
-  - 先輩の手紙プレビュー + 一言メッセージ表示
-  - 「あなたの経験を残す」→ `/compose?baton=k01`
+  - バトン＝「この方と話してもよい」という**紹介**として提示する
+    （以前の「経験を残す＝投稿へ誘導」から方針変更）
+  - 演出は2系統を `src/lib/flags.ts` で切り替え可能:
+    - `classic`  … 静かな手紙ベースの受け取り画面
+    - `ceremony` … 「人生のバトンを丁寧に受け取る」儀式体験（既定）
+      - スマホ前提・手で受け取る感覚（`BatonCeremony.tsx`）
+      - 包みをタップ → 中から手紙がふわっと立ち上がる
+      - 「かさかさ」の紙摩擦音を Web Audio で合成（`usePaperRustle.ts`）
+      - オフホワイトの柔らかい色味・丸みのあるフォント・ゆっくりした動き
+  - 切り替え: 環境変数 `NEXT_PUBLIC_BATON_EXPERIENCE=classic|ceremony`、
+    または URL の `?experience=classic|ceremony`
+  - CTA は「この方と話してみる」（紹介された先輩との対話へ）
 - **コンポーズページのバトンコンテキスト** (`src/app/compose/page.tsx`)
   - `?baton=k01` があれば冒頭に発行元先輩の情報を表示
 

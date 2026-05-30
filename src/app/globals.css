@@ -55,6 +55,32 @@ svg text {
   background: rgba(122, 140, 127, 0.25);
 }
 
+/* バトン受け取りの儀式演出（スマホ前提）。
+   オフホワイトの柔らかな色味・丸みのあるフォント・ゆったりした余白。 */
+.baton-ceremony {
+  --c-bg: #fbfaf6;
+  --c-ink: #4a4338;
+  --c-muted: #9b9486;
+  --c-paper: #fffdf8;
+  --c-paper-2: #f3eee2;
+  --c-parcel: #efe7d6;
+  --c-parcel-edge: #cdc2a8;
+  --c-ribbon: #c2ad8e;
+
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-rounded), "Hiragino Maru Gothic ProN",
+    "Rounded Mplus 1c", "Quicksand", system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.baton-ceremony p,
+.baton-ceremony button,
+.baton-ceremony a {
+  font-family: inherit;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

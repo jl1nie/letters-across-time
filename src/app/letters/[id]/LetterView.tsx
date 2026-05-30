@@ -23,8 +23,8 @@ function DialogueRequest({ letter }: { letter: Letter }) {
   }, [sent]);
 
   const batonMessage = letter.message.judgment === "good_job"
-    ? "話してくれてありがとう。あなたの言葉を聞いて、自分もあの選択を改めて振り返ることができました。いつか、あなたの経験を誰かに語れる時がきたら、このバトンを繋いでもらえたら嬉しいです。"
-    : "話してくれてありがとう。あなたの迷いを聞いて、自分のことも改めて考えさせてもらいました。焦らず、いつかあなたの経験を誰かに届けてほしいです。";
+    ? "あなたの今の状況、受け取りました。よかったら、あの選択のその後を、直接お話しさせてください。あなたと話せたら嬉しいです。"
+    : "あなたの迷い、受け取りました。答えにはならないかもしれませんが、わたしの回り道でよければ、よかったら直接お話しします。";
 
   const batonHref = `/baton?from=${letter.id}&message=${encodeURIComponent(batonMessage)}`;
 
@@ -49,12 +49,12 @@ function DialogueRequest({ letter }: { letter: Letter }) {
               className="w-full border-t border-[color:var(--rule)] pt-10 flex flex-col items-center gap-6 text-center"
             >
               <p className="text-xs tracking-[0.35em] text-[color:var(--muted)]">
-                バトンが届きました
+                お返事が届きました
               </p>
               <p className="text-[15px] leading-[2.2]">
                 {letter.profile.occupation}・{letter.profile.age}歳の
                 <br />
-                あの方から。
+                この方と、話せます。
               </p>
               <Link
                 href={batonHref}
