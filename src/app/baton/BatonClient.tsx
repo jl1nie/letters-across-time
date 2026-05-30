@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { senpai } from "@/data/senpai";
 import { LetterCard } from "@/components/LetterCard";
+import { resolveBatonExperience } from "@/lib/flags";
+import { BatonCeremony } from "./BatonCeremony";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
 
@@ -12,6 +14,7 @@ export function BatonClient() {
   const params = useSearchParams();
   const fromId = params.get("from");
   const message = params.get("message");
+  const experience = resolveBatonExperience(params.get("experience"));
 
   const letter = fromId ? senpai.find((l) => l.id === fromId) : null;
 
@@ -31,7 +34,9 @@ export function BatonClient() {
     );
   }
 
-  const composeHref = `/write?baton=${letter.id}`;
+  if (experience === "ceremony") {
+    return <BatonCeremony letter={letter} message={message} />;
+  }
 
   return (
     <main className="flex flex-1 flex-col items-center px-6 py-20">
@@ -49,7 +54,7 @@ export function BatonClient() {
             {letter.profile.occupation}・{letter.profile.age}歳・
             {genderLabel[letter.profile.gender]}
             <br />
-            <span className="text-[color:var(--muted)]">のあの方から。</span>
+            <span className="text-[color:var(--muted)]">のあの方と、話してみませんか。</span>
           </h1>
 
           {message && (
@@ -83,20 +88,20 @@ export function BatonClient() {
           className="border-t border-[color:var(--rule)] pt-16 flex flex-col items-center gap-6 text-center"
         >
           <p className="text-[15px] leading-[2.4] font-light">
-            あの選択の先が、少しずつ見えてきたとき。
+            この方になら、話してみてもいいかもしれません。
             <br />
-            その経験を、次の誰かへ。
+            あなたの今を、少しだけ預けてみてください。
           </p>
           <p className="text-xs text-[color:var(--muted)] leading-[2]">
-            いまでも、数ヶ月後でも、数年後でも。
+            いまでも、数日後でも、数年後でも。
             <br />
-            自分の選択の結果が振り返れるようになったとき、このバトンを渡してください。
+            気持ちが向いたときに、そっと声をかけてみてください。
           </p>
           <Link
-            href={composeHref}
+            href={`/letters/${letter.id}`}
             className="group mt-6 text-sm tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors"
           >
-            あなたの経験を残す
+            この方と話してみる
             <span className="ml-3 transition-transform group-hover:translate-x-1 inline-block">
               →
             </span>
