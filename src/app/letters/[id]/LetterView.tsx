@@ -167,7 +167,7 @@ export function LetterView({
             <Envelope
               opened={opened}
               onOpen={() => {
-                playRustle();
+                void playRustle();
                 setOpened(true);
               }}
             />

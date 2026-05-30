@@ -33,6 +33,9 @@ export function usePaperRustle() {
         .webkitAudioContext;
     if (!AC) return;
 
+    // この呼び出しで実際に使った ctx を catch でも参照できるよう外に出す。
+    let usedCtx: AudioContext | null = null;
+
     // 音は演出の付加要素。ブラウザの自動再生制限やデバイスの不具合などで
     // 失敗しても、呼び出し元の主処理（封筒を開く等）を止めないよう、
     // 例外は内部で握りつぶしてここから外へは投げない。
@@ -48,6 +51,7 @@ export function usePaperRustle() {
 
       if (!sharedCtx) sharedCtx = new AC();
       const ctx = sharedCtx;
+      usedCtx = ctx;
       // 一時停止中は resume の完了を待ってからスケジュールする。待たずに
       // 積むと currentTime が 0 のまま全粒を同じ時刻に積み、復帰時に同時に
       // 鳴ってしまうことがあるため（モバイル初回タップなど）。
@@ -106,12 +110,18 @@ export function usePaperRustle() {
       }
     } catch {
       // 演出音の失敗は無視する（呼び出し元の主処理は継続させる）。
-      // 壊れた AudioContext は明示的に閉じて解放し（インスタンス上限対策）、
-      // 共有資源を破棄して次回の再生で作り直し、自己回復できるようにする。
-      sharedCtx?.close().catch(() => {});
-      sharedCtx = null;
-      sharedMaster = null;
-      sharedNoise = null;
+      // 失敗したこの ctx を閉じて解放する（インスタンス上限対策）。
+      // await 中に別の再生呼び出しが新しい ctx を作っている場合があるため、
+      // 共有参照のリセットは「今もこの失敗した ctx を指している」ときだけに
+      // 限定し、新しく作られた正常な ctx を取り違えて壊さないようにする。
+      if (usedCtx) {
+        usedCtx.close().catch(() => {});
+        if (sharedCtx === usedCtx) {
+          sharedCtx = null;
+          sharedMaster = null;
+          sharedNoise = null;
+        }
+      }
     }
   }, []);
 }

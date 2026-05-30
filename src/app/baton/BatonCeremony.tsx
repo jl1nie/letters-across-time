@@ -40,7 +40,7 @@ export function BatonCeremony({
 
   const open = () => {
     if (phase !== "wrapped") return;
-    playRustle();
+    void playRustle();
     setPhase("opening");
   };
 
