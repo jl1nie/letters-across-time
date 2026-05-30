@@ -25,7 +25,7 @@ let sharedNoise: AudioBuffer | null = null;
 const NOISE_SECONDS = 1.0;
 
 export function usePaperRustle() {
-  return useCallback((opts: RustleOptions = {}) => {
+  return useCallback(async (opts: RustleOptions = {}) => {
     if (typeof window === "undefined") return;
     const AC =
       window.AudioContext ||
@@ -48,7 +48,10 @@ export function usePaperRustle() {
 
       if (!sharedCtx) sharedCtx = new AC();
       const ctx = sharedCtx;
-      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      // 一時停止中は resume の完了を待ってからスケジュールする。待たずに
+      // 積むと currentTime が 0 のまま全粒を同じ時刻に積み、復帰時に同時に
+      // 鳴ってしまうことがあるため（モバイル初回タップなど）。
+      if (ctx.state === "suspended") await ctx.resume();
 
       if (!sharedMaster) {
         sharedMaster = ctx.createGain();
@@ -103,8 +106,9 @@ export function usePaperRustle() {
       }
     } catch {
       // 演出音の失敗は無視する（呼び出し元の主処理は継続させる）。
-      // 失敗した状態を引きずらないよう共有資源を破棄し、次回の再生で
-      // 作り直して自己回復できるようにする。
+      // 壊れた AudioContext は明示的に閉じて解放し（インスタンス上限対策）、
+      // 共有資源を破棄して次回の再生で作り直し、自己回復できるようにする。
+      sharedCtx?.close().catch(() => {});
       sharedCtx = null;
       sharedMaster = null;
       sharedNoise = null;
