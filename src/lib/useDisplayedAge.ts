@@ -13,6 +13,9 @@ export function useDisplayedAge(id: string, realAge: number): number {
   useEffect(() => {
     setMounted(true);
   }, []);
-  if (!mounted || !id) return realAge;
+  if (!id) return realAge;
+  // マウント前(SSR/初回)は sessionStorage を使わない決定的な値を返し、
+  // ハイドレーションのズレを防ぐ。最終値に近いのでちらつきも最小。
+  if (!mounted) return displayedAge(id, realAge - 3);
   return displayedAge(id, getUserAge(realAge - 3));
 }
