@@ -138,6 +138,7 @@ function DialogueRequest({ letter }: { letter: Letter }) {
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
                   rows={2}
+                  aria-label="先輩への返信"
                   placeholder="返したいことがあれば、ひとことだけ。"
                   className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-sm py-2 resize-none leading-[2]"
                 />
@@ -343,7 +344,8 @@ export function LetterView({
                     </span>
                   </Link>
 
-                  <DialogueRequest letter={letter} />
+                  {/* letter.id ごとに作り直し、対話状態が次の手紙へ残らないようにする */}
+                  <DialogueRequest key={letter.id} letter={letter} />
                 </motion.div>
               )}
             </AnimatePresence>
