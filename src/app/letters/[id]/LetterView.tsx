@@ -7,7 +7,7 @@ import { Envelope } from "@/components/Envelope";
 import { Typewriter } from "@/components/Typewriter";
 import type { Letter } from "@/data/senpai";
 import { getIntroduction } from "@/data/introductions";
-import { displayedAge, getUserAge } from "@/lib/displayAge";
+import { useDisplayedAge } from "@/lib/useDisplayedAge";
 import { usePaperRustle } from "@/lib/usePaperRustle";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
@@ -37,7 +37,13 @@ function Bubble({
 
 type Step = "idle" | "form" | "talking" | "done";
 
-function DialogueRequest({ letter }: { letter: Letter }) {
+function DialogueRequest({
+  letter,
+  shownAge,
+}: {
+  letter: Letter;
+  shownAge: number;
+}) {
   const [step, setStep] = useState<Step>("idle");
   const [situation, setSituation] = useState("");
   const [reply, setReply] = useState("");
@@ -83,7 +89,7 @@ function DialogueRequest({ letter }: { letter: Letter }) {
         {batonHref ? (
           <>
             <p className="text-[15px] leading-[2.2]">
-              {letter.profile.occupation}・{letter.profile.age}歳のこの方から、
+              {letter.profile.occupation}・{shownAge}歳のこの方から、
               <br />
               次に話すといい方を、
               <br />
@@ -248,12 +254,8 @@ export function LetterView({
   const [opened, setOpened] = useState(false);
   const [revealLetter, setRevealLetter] = useState(false);
   const [bodyDone, setBodyDone] = useState(false);
-  const [shownAge, setShownAge] = useState<number>(letter.profile.age);
+  const shownAge = useDisplayedAge(letter.id, letter.profile.age);
   const playRustle = usePaperRustle();
-
-  useEffect(() => {
-    setShownAge(displayedAge(letter.id, getUserAge(letter.profile.age - 3)));
-  }, [letter.id, letter.profile.age]);
 
   useEffect(() => {
     if (!opened) return;
@@ -357,7 +359,11 @@ export function LetterView({
                   </Link>
 
                   {/* letter.id ごとに作り直し、対話状態が次の手紙へ残らないようにする */}
-                  <DialogueRequest key={letter.id} letter={letter} />
+                  <DialogueRequest
+                    key={letter.id}
+                    letter={letter}
+                    shownAge={shownAge}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
