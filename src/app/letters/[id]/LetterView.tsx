@@ -121,11 +121,13 @@ function DialogueRequest({ letter }: { letter: Letter }) {
         ))}
 
         {conversationDone && (
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {!replied ? (
               <motion.div
+                key="reply-form"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 1.0, delay: 0.4 }}
                 className="mt-4 flex flex-col gap-4"
               >
@@ -154,8 +156,10 @@ function DialogueRequest({ letter }: { letter: Letter }) {
               </motion.div>
             ) : (
               <motion.div
+                key="reply-sent"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 1.0 }}
                 className="flex flex-col gap-4"
               >
