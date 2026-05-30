@@ -15,10 +15,13 @@ type RustleOptions = {
 
 export function usePaperRustle() {
   const ctxRef = useRef<AudioContext | null>(null);
+  const masterRef = useRef<GainNode | null>(null);
 
   // 後始末
   useEffect(() => {
     return () => {
+      masterRef.current?.disconnect();
+      masterRef.current = null;
       ctxRef.current?.close().catch(() => {});
       ctxRef.current = null;
     };
@@ -43,9 +46,15 @@ export function usePaperRustle() {
     }
     if (ctx.state === "suspended") ctx.resume().catch(() => {});
 
-    const master = ctx.createGain();
+    // master GainNode は AudioContext ごとに1つだけ作って使い回す
+    // （play のたびに作って destination へ繋ぐとノードが累積するため）。
+    let master = masterRef.current;
+    if (!master) {
+      master = ctx.createGain();
+      master.connect(ctx.destination);
+      masterRef.current = master;
+    }
     master.gain.value = opts.gain ?? 0.06;
-    master.connect(ctx.destination);
 
     const now = ctx.currentTime;
     const grains = opts.grains ?? 6;
