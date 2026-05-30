@@ -37,6 +37,15 @@ export function usePaperRustle() {
     // 失敗しても、呼び出し元の主処理（封筒を開く等）を止めないよう、
     // 例外は内部で握りつぶしてここから外へは投げない。
     try {
+      // モバイルのバックグラウンド化やシステム割り込みで ctx が closed に
+      // なった場合は、それに紐づく master/noise ごと作り直す（旧 ctx の
+      // ノードは新しい ctx では使えないため、3つまとめてリセットする）。
+      if (sharedCtx && sharedCtx.state === "closed") {
+        sharedCtx = null;
+        sharedMaster = null;
+        sharedNoise = null;
+      }
+
       if (!sharedCtx) sharedCtx = new AC();
       const ctx = sharedCtx;
       if (ctx.state === "suspended") ctx.resume().catch(() => {});
