@@ -102,6 +102,7 @@ export default function ComposePage() {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
+                maxLength={2}
                 value={age ?? ""}
                 onChange={(e) => setAge(parseAgeInput(e.target.value))}
                 placeholder="34"
