@@ -10,11 +10,13 @@ const notoSerifJp = Noto_Serif_JP({
 });
 
 // バトン受け取りの儀式演出で使う、丸みのあるやわらかなフォント。
+// 日本語にも適用するため subsets は指定せず（指定すると latin のみになる）、
+// 重いので preload は無効化してceremony表示時に遅延読み込みさせる。
 const zenMaruGothic = Zen_Maru_Gothic({
   variable: "--font-rounded",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {

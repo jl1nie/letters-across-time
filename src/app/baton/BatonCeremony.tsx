@@ -21,14 +21,15 @@ type Phase = "wrapped" | "opening" | "letter";
 export function BatonCeremony({
   letter,
   message,
+  introducer,
 }: {
   letter: Letter;
   message: string | null;
+  introducer: Letter | null;
 }) {
   const reduced = useReducedMotion();
   const playRustle = usePaperRustle();
   const [phase, setPhase] = useState<Phase>("wrapped");
-  const [reaching, setReaching] = useState(false);
 
   // 包みが開いたら、少し間をおいて手紙の内容を見せる（焦らせない）
   useEffect(() => {
@@ -100,7 +101,16 @@ export function BatonCeremony({
                 className="relative z-10 w-[19rem]"
               >
                 <Card>
-                  <div className="text-center">
+                  {introducer && (
+                    <p className="text-center text-xs tracking-[0.18em] text-[color:var(--c-muted)] leading-[2.2]">
+                      {introducer.profile.occupation}・
+                      {introducer.profile.age}歳の方が、
+                      <br />
+                      この方を紹介してくれました。
+                    </p>
+                  )}
+
+                  <div className={`text-center ${introducer ? "mt-6" : ""}`}>
                     <p className="text-xs tracking-[0.3em] text-[color:var(--c-muted)]">
                       この方と、
                     </p>
@@ -120,54 +130,22 @@ export function BatonCeremony({
                     </p>
                   )}
 
-                  <AnimatePresence mode="wait">
-                    {!reaching ? (
-                      <motion.div
-                        key="cta"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{
-                          duration: 1.4,
-                          delay: phase === "letter" ? 0.6 : 0,
-                        }}
-                        className="mt-9 flex flex-col items-center gap-5"
-                      >
-                        <button
-                          onClick={() => {
-                            playRustle({ grains: 4, gain: 0.05 });
-                            setReaching(true);
-                          }}
-                          className="rounded-full bg-[color:var(--c-ink)] px-9 py-3 text-sm tracking-[0.22em] text-[color:var(--c-paper)] transition-transform active:scale-[0.97]"
-                        >
-                          この方と話してみる
-                        </button>
-                        <Link
-                          href={`/letters/${letter.id}`}
-                          className="text-xs tracking-[0.24em] text-[color:var(--c-muted)] underline-offset-8 hover:underline"
-                        >
-                          まずは手紙を読む
-                        </Link>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="reached"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1.6, ease: "easeOut" }}
-                        className="mt-9 text-center"
-                      >
-                        <p className="text-[14px] leading-[2.3] text-[color:var(--c-ink)]">
-                          ご縁が、つながりました。
-                        </p>
-                        <p className="mt-3 text-xs leading-[2.2] text-[color:var(--c-muted)]">
-                          やりとりの方法を、
-                          <br />
-                          追ってそっとお知らせします。
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                      duration: 1.4,
+                      delay: phase === "letter" ? 0.6 : 0,
+                    }}
+                    className="mt-9 flex flex-col items-center gap-5"
+                  >
+                    <Link
+                      href={`/letters/${letter.id}`}
+                      className="rounded-full bg-[color:var(--c-ink)] px-9 py-3 text-sm tracking-[0.22em] text-[color:var(--c-paper)] transition-transform active:scale-[0.97]"
+                    >
+                      この方と話してみる
+                    </Link>
+                  </motion.div>
                 </Card>
               </motion.div>
             )}
@@ -201,7 +179,7 @@ export function BatonCeremony({
                         repeat: Infinity,
                       }
                 }
-                className="absolute z-0 outline-none"
+                className="absolute z-0 rounded-[2rem] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--c-ribbon)] focus-visible:ring-offset-2"
               >
                 <Parcel />
               </motion.button>

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Envelope } from "@/components/Envelope";
 import { Typewriter } from "@/components/Typewriter";
 import type { Letter } from "@/data/senpai";
+import { getIntroduction } from "@/data/introductions";
 import { displayedAge, getUserAge } from "@/lib/displayAge";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
@@ -22,11 +23,11 @@ function DialogueRequest({ letter }: { letter: Letter }) {
     return () => clearTimeout(t);
   }, [sent]);
 
-  const batonMessage = letter.message.judgment === "good_job"
-    ? "あなたの今の状況、受け取りました。よかったら、あの選択のその後を、直接お話しさせてください。あなたと話せたら嬉しいです。"
-    : "あなたの迷い、受け取りました。答えにはならないかもしれませんが、わたしの回り道でよければ、よかったら直接お話しします。";
-
-  const batonHref = `/baton?from=${letter.id}&message=${encodeURIComponent(batonMessage)}`;
+  // この方(A)と話したあと、A が「次に話すといい人(B)」を紹介してくれる。
+  const intro = getIntroduction(letter.id);
+  const batonHref = intro
+    ? `/baton?from=${intro.to}&by=${letter.id}&message=${encodeURIComponent(intro.note)}`
+    : null;
 
   if (sent) {
     return (
@@ -41,7 +42,7 @@ function DialogueRequest({ letter }: { letter: Letter }) {
         </motion.p>
 
         <AnimatePresence>
-          {batonReady && (
+          {batonReady && batonHref && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -49,12 +50,14 @@ function DialogueRequest({ letter }: { letter: Letter }) {
               className="w-full border-t border-[color:var(--rule)] pt-10 flex flex-col items-center gap-6 text-center"
             >
               <p className="text-xs tracking-[0.35em] text-[color:var(--muted)]">
-                お返事が届きました
+                お話しできました
               </p>
               <p className="text-[15px] leading-[2.2]">
-                {letter.profile.occupation}・{letter.profile.age}歳の
+                {letter.profile.occupation}・{letter.profile.age}歳のこの方から、
                 <br />
-                この方と、話せます。
+                次に話すといい方を、
+                <br />
+                そっと紹介してもらいました。
               </p>
               <Link
                 href={batonHref}

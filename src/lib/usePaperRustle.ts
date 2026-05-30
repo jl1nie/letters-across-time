@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 
 // 「かさかさ」という心地よい紙の摩擦音を Web Audio で合成して鳴らす。
 // 音源ファイルを持たず、帯域を絞ったノイズの粒を数粒、ゆっくり重ねることで
@@ -11,23 +11,21 @@ type RustleOptions = {
   gain?: number;
   // 粒の数。多いほど長く擦れる感じになる
   grains?: number;
+  // 粒どうしの間隔（秒）。大きいほどゆっくり擦れる
+  gap?: number;
 };
 
+// AudioContext・master・ノイズ buffer はページ全体で1つだけ生成して使い回す。
+// タップのたびに buffer を作って Math.random() で埋めると、特にモバイルで
+// CPU 負荷や GC によるオーディオの瞬断（プチノイズ）の原因になるため。
+let sharedCtx: AudioContext | null = null;
+let sharedMaster: GainNode | null = null;
+let sharedNoise: AudioBuffer | null = null;
+
+const NOISE_SECONDS = 1.0;
+
 export function usePaperRustle() {
-  const ctxRef = useRef<AudioContext | null>(null);
-  const masterRef = useRef<GainNode | null>(null);
-
-  // 後始末
-  useEffect(() => {
-    return () => {
-      masterRef.current?.disconnect();
-      masterRef.current = null;
-      ctxRef.current?.close().catch(() => {});
-      ctxRef.current = null;
-    };
-  }, []);
-
-  const play = useCallback((opts: RustleOptions = {}) => {
+  return useCallback((opts: RustleOptions = {}) => {
     if (typeof window === "undefined") return;
     const AC =
       window.AudioContext ||
@@ -35,41 +33,42 @@ export function usePaperRustle() {
         .webkitAudioContext;
     if (!AC) return;
 
-    let ctx = ctxRef.current;
-    if (!ctx) {
+    if (!sharedCtx) {
       try {
-        ctx = new AC();
+        sharedCtx = new AC();
       } catch {
         return;
       }
-      ctxRef.current = ctx;
     }
+    const ctx = sharedCtx;
     if (ctx.state === "suspended") ctx.resume().catch(() => {});
 
-    // master GainNode は AudioContext ごとに1つだけ作って使い回す
-    // （play のたびに作って destination へ繋ぐとノードが累積するため）。
-    let master = masterRef.current;
-    if (!master) {
-      master = ctx.createGain();
-      master.connect(ctx.destination);
-      masterRef.current = master;
+    if (!sharedMaster) {
+      sharedMaster = ctx.createGain();
+      sharedMaster.connect(ctx.destination);
     }
+    const master = sharedMaster;
     master.gain.value = opts.gain ?? 0.06;
+
+    // ノイズ source は使い回す共有 buffer のランダムな位置から再生する
+    if (!sharedNoise) {
+      const frames = Math.ceil(ctx.sampleRate * NOISE_SECONDS);
+      sharedNoise = ctx.createBuffer(1, frames, ctx.sampleRate);
+      const data = sharedNoise.getChannelData(0);
+      for (let j = 0; j < frames; j++) data[j] = Math.random() * 2 - 1;
+    }
+    const noise = sharedNoise;
 
     const now = ctx.currentTime;
     const grains = opts.grains ?? 6;
+    const gap = opts.gap ?? 0.17;
 
     for (let i = 0; i < grains; i++) {
-      const start = now + i * 0.075 + Math.random() * 0.025;
-      const dur = 0.05 + Math.random() * 0.05;
-
-      const frames = Math.max(1, Math.ceil(ctx.sampleRate * dur));
-      const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let j = 0; j < frames; j++) data[j] = Math.random() * 2 - 1;
+      const start = now + i * gap + Math.random() * 0.04;
+      const dur = 0.08 + Math.random() * 0.06;
 
       const src = ctx.createBufferSource();
-      src.buffer = buffer;
+      src.buffer = noise;
 
       // 高めの帯域を強調すると「紙」らしい乾いた擦れになる
       const hp = ctx.createBiquadFilter();
@@ -92,10 +91,8 @@ export function usePaperRustle() {
       bp.connect(g);
       g.connect(master);
 
-      src.start(start);
-      src.stop(start + dur + 0.02);
+      const offset = Math.random() * (NOISE_SECONDS - dur);
+      src.start(start, offset, dur);
     }
   }, []);
-
-  return play;
 }
