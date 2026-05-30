@@ -33,66 +33,67 @@ export function usePaperRustle() {
         .webkitAudioContext;
     if (!AC) return;
 
-    if (!sharedCtx) {
-      try {
-        sharedCtx = new AC();
-      } catch {
-        return;
+    // 音は演出の付加要素。ブラウザの自動再生制限やデバイスの不具合などで
+    // 失敗しても、呼び出し元の主処理（封筒を開く等）を止めないよう、
+    // 例外は内部で握りつぶしてここから外へは投げない。
+    try {
+      if (!sharedCtx) sharedCtx = new AC();
+      const ctx = sharedCtx;
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+
+      if (!sharedMaster) {
+        sharedMaster = ctx.createGain();
+        sharedMaster.connect(ctx.destination);
       }
-    }
-    const ctx = sharedCtx;
-    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      const master = sharedMaster;
+      master.gain.value = opts.gain ?? 0.06;
 
-    if (!sharedMaster) {
-      sharedMaster = ctx.createGain();
-      sharedMaster.connect(ctx.destination);
-    }
-    const master = sharedMaster;
-    master.gain.value = opts.gain ?? 0.06;
+      // ノイズ source は使い回す共有 buffer のランダムな位置から再生する
+      if (!sharedNoise) {
+        const frames = Math.ceil(ctx.sampleRate * NOISE_SECONDS);
+        sharedNoise = ctx.createBuffer(1, frames, ctx.sampleRate);
+        const data = sharedNoise.getChannelData(0);
+        for (let j = 0; j < frames; j++) data[j] = Math.random() * 2 - 1;
+      }
+      const noise = sharedNoise;
 
-    // ノイズ source は使い回す共有 buffer のランダムな位置から再生する
-    if (!sharedNoise) {
-      const frames = Math.ceil(ctx.sampleRate * NOISE_SECONDS);
-      sharedNoise = ctx.createBuffer(1, frames, ctx.sampleRate);
-      const data = sharedNoise.getChannelData(0);
-      for (let j = 0; j < frames; j++) data[j] = Math.random() * 2 - 1;
-    }
-    const noise = sharedNoise;
+      const now = ctx.currentTime;
+      const grains = opts.grains ?? 6;
+      const gap = opts.gap ?? 0.17;
 
-    const now = ctx.currentTime;
-    const grains = opts.grains ?? 6;
-    const gap = opts.gap ?? 0.17;
+      for (let i = 0; i < grains; i++) {
+        const start = now + i * gap + Math.random() * 0.04;
+        const dur = 0.08 + Math.random() * 0.06;
 
-    for (let i = 0; i < grains; i++) {
-      const start = now + i * gap + Math.random() * 0.04;
-      const dur = 0.08 + Math.random() * 0.06;
+        const src = ctx.createBufferSource();
+        src.buffer = noise;
 
-      const src = ctx.createBufferSource();
-      src.buffer = noise;
+        // 高めの帯域を強調すると「紙」らしい乾いた擦れになる
+        const hp = ctx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.value = 1400;
 
-      // 高めの帯域を強調すると「紙」らしい乾いた擦れになる
-      const hp = ctx.createBiquadFilter();
-      hp.type = "highpass";
-      hp.frequency.value = 1400;
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = 2600 + Math.random() * 2200;
+        bp.Q.value = 0.6;
 
-      const bp = ctx.createBiquadFilter();
-      bp.type = "bandpass";
-      bp.frequency.value = 2600 + Math.random() * 2200;
-      bp.Q.value = 0.6;
+        const g = ctx.createGain();
+        const peak = 0.5 + Math.random() * 0.5;
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.linearRampToValueAtTime(peak, start + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
 
-      const g = ctx.createGain();
-      const peak = 0.5 + Math.random() * 0.5;
-      g.gain.setValueAtTime(0.0001, start);
-      g.gain.linearRampToValueAtTime(peak, start + 0.012);
-      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        src.connect(hp);
+        hp.connect(bp);
+        bp.connect(g);
+        g.connect(master);
 
-      src.connect(hp);
-      hp.connect(bp);
-      bp.connect(g);
-      g.connect(master);
-
-      const offset = Math.random() * (NOISE_SECONDS - dur);
-      src.start(start, offset, dur);
+        const offset = Math.random() * (NOISE_SECONDS - dur);
+        src.start(start, offset, dur);
+      }
+    } catch {
+      // 演出音の失敗は無視する（呼び出し元の主処理は継続させる）
     }
   }, []);
 }
