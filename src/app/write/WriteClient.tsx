@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { senpai } from "@/data/senpai";
 import { useDisplayedAge } from "@/lib/useDisplayedAge";
+import { parseAgeInput } from "@/lib/parseAgeInput";
 
 type OccCat =
   | "デザイン"
@@ -119,13 +120,16 @@ export function WriteClient() {
                 いま、おいくつですか。
               </h2>
               <input
-                type="number" min={20} max={70}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={2}
                 value={age ?? ""}
-                onChange={(e) => setAge(Number(e.target.value) || null)}
+                onChange={(e) => setAge(parseAgeInput(e.target.value))}
                 placeholder="36"
                 className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-2xl py-3 text-center tracking-[0.2em]"
               />
-              <Forward enabled={!!age && age >= 20} onClick={next} />
+              <Forward enabled={!!age && age >= 20 && age <= 70} onClick={next} />
             </motion.section>
           )}
 
