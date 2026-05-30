@@ -12,17 +12,37 @@ import { usePaperRustle } from "@/lib/usePaperRustle";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
 
-function DialogueRequest({ letter }: { letter: Letter }) {
-  const [open, setOpen] = useState(false);
-  const [situation, setSituation] = useState("");
-  const [sent, setSent] = useState(false);
-  const [batonReady, setBatonReady] = useState(false);
+function Bubble({
+  from,
+  children,
+}: {
+  from: "me" | "senpai";
+  children: React.ReactNode;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1.0, ease: "easeOut" }}
+      className={
+        from === "me"
+          ? "self-end max-w-[80%] text-[14px] leading-[2] px-4 py-3 rounded-2xl border border-[color:var(--rule)]"
+          : "self-start max-w-[85%] text-[14px] leading-[2] px-4 py-3 rounded-2xl bg-[#efe9da]"
+      }
+    >
+      {children}
+    </motion.div>
+  );
+}
 
-  useEffect(() => {
-    if (!sent) return;
-    const t = setTimeout(() => setBatonReady(true), 2200);
-    return () => clearTimeout(t);
-  }, [sent]);
+type Step = "idle" | "form" | "talking" | "done";
+
+function DialogueRequest({ letter }: { letter: Letter }) {
+  const [step, setStep] = useState<Step>("idle");
+  const [situation, setSituation] = useState("");
+  const [reply, setReply] = useState("");
+  const [replied, setReplied] = useState(false);
+  const [revealed, setRevealed] = useState(0);
 
   // この方(A)と話したあと、A が「次に話すといい人(B)」を紹介してくれる。
   const intro = getIntroduction(letter.id);
@@ -30,57 +50,138 @@ function DialogueRequest({ letter }: { letter: Letter }) {
     ? `/baton?from=${intro.to}&by=${letter.id}&message=${encodeURIComponent(intro.note)}`
     : null;
 
-  if (sent) {
-    return (
-      <div className="w-full flex flex-col items-center gap-10">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.0 }}
-          className="text-xs tracking-[0.25em] text-[color:var(--muted)] text-center"
-        >
-          リクエストが届きました。担当者よりご連絡します。
-        </motion.p>
+  // 先輩の返事。手紙の判断や「その後」を踏まえた語りで、対話している感を出す。
+  const senpaiLines = [
+    "こんにちは。あなたのお話、受け取りました。",
+    letter.message.judgment === "good_job"
+      ? "わたしも同じところで、ずいぶん長く迷いました。だからこそ、声をかけたくなって。"
+      : "わたしの選択が正解だったとは、正直まだ言い切れません。それでも、回り道の話でよければ。",
+    `あのあと、${letter.message.afterwards}`,
+  ];
 
-        <AnimatePresence>
-          {batonReady && batonHref && (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.4, ease: "easeOut" }}
-              className="w-full border-t border-[color:var(--rule)] pt-10 flex flex-col items-center gap-6 text-center"
+  // 対話に入ったら、先輩の返事を一つずつゆっくり表示する。
+  useEffect(() => {
+    if (step !== "talking" || revealed >= senpaiLines.length) return;
+    const t = setTimeout(
+      () => setRevealed((r) => r + 1),
+      revealed === 0 ? 900 : 1700,
+    );
+    return () => clearTimeout(t);
+  }, [step, revealed, senpaiLines.length]);
+
+  const conversationDone = revealed >= senpaiLines.length;
+
+  if (step === "done") {
+    return (
+      <div className="w-full border-t border-[color:var(--rule)] pt-10 flex flex-col items-center gap-6 text-center">
+        <p className="text-xs tracking-[0.35em] text-[color:var(--muted)]">
+          お話しできました
+        </p>
+        {batonHref ? (
+          <>
+            <p className="text-[15px] leading-[2.2]">
+              {letter.profile.occupation}・{letter.profile.age}歳のこの方から、
+              <br />
+              次に話すといい方を、
+              <br />
+              そっと紹介してもらいました。
+            </p>
+            <Link
+              href={batonHref}
+              className="group mt-2 text-sm tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors"
             >
-              <p className="text-xs tracking-[0.35em] text-[color:var(--muted)]">
-                お話しできました
-              </p>
-              <p className="text-[15px] leading-[2.2]">
-                {letter.profile.occupation}・{letter.profile.age}歳のこの方から、
-                <br />
-                次に話すといい方を、
-                <br />
-                そっと紹介してもらいました。
-              </p>
-              <Link
-                href={batonHref}
-                className="group mt-2 text-sm tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors"
+              バトンを受け取る
+              <span className="ml-3 transition-transform group-hover:translate-x-1 inline-block">
+                →
+              </span>
+            </Link>
+          </>
+        ) : (
+          <p className="text-[15px] leading-[2.2] text-[color:var(--muted)]">
+            話してくれて、ありがとう。
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (step === "talking") {
+    return (
+      <div className="w-full border-t border-[color:var(--rule)] pt-12 flex flex-col gap-4">
+        <p className="text-xs tracking-[0.25em] text-[color:var(--muted)] text-center mb-2">
+          {letter.profile.occupation}さんと話しています
+        </p>
+
+        <Bubble from="me">{situation}</Bubble>
+
+        {senpaiLines.slice(0, revealed).map((line, i) => (
+          <Bubble key={i} from="senpai">
+            {line}
+          </Bubble>
+        ))}
+
+        {conversationDone && (
+          <AnimatePresence>
+            {!replied ? (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.0, delay: 0.4 }}
+                className="mt-4 flex flex-col gap-4"
               >
-                バトンを受け取る
-                <span className="ml-3 transition-transform group-hover:translate-x-1 inline-block">
-                  →
-                </span>
-              </Link>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <textarea
+                  value={reply}
+                  onChange={(e) => setReply(e.target.value)}
+                  rows={2}
+                  placeholder="返したいことがあれば、ひとことだけ。"
+                  className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-sm py-2 resize-none leading-[2]"
+                />
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setStep("done")}
+                    className="text-xs tracking-[0.25em] text-[color:var(--muted)] hover:text-[color:var(--foreground)] transition-colors"
+                  >
+                    対話を終える →
+                  </button>
+                  <button
+                    disabled={reply.trim().length === 0}
+                    onClick={() => setReplied(true)}
+                    className="text-xs tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+                  >
+                    返す →
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.0 }}
+                className="flex flex-col gap-4"
+              >
+                <Bubble from="me">{reply}</Bubble>
+                <Bubble from="senpai">
+                  話せてよかった。ひとつ、あなたに会ってほしい人がいます。
+                </Bubble>
+                <button
+                  onClick={() => setStep("done")}
+                  className="self-center mt-4 text-sm tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors"
+                >
+                  対話を終える →
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
     );
   }
 
   return (
     <div className="w-full border-t border-[color:var(--rule)] pt-12 flex flex-col items-center gap-6">
-      {!open ? (
+      {step === "idle" ? (
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => setStep("form")}
           className="text-xs tracking-[0.3em] text-[color:var(--muted)] hover:text-[color:var(--foreground)] transition-colors"
         >
           この方と話してみる →
@@ -105,7 +206,7 @@ function DialogueRequest({ letter }: { letter: Letter }) {
           <div className="flex justify-end">
             <button
               disabled={situation.trim().length === 0}
-              onClick={() => setSent(true)}
+              onClick={() => setStep("talking")}
               className="text-xs tracking-[0.3em] border-b border-[color:var(--rule)] pb-1 hover:border-[color:var(--foreground)] transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
             >
               送る →
