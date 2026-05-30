@@ -11,6 +11,8 @@ type RustleOptions = {
   gain?: number;
   // 粒の数。多いほど長く擦れる感じになる
   grains?: number;
+  // 粒どうしの間隔（秒）。大きいほどゆっくり擦れる
+  gap?: number;
 };
 
 export function usePaperRustle() {
@@ -59,9 +61,12 @@ export function usePaperRustle() {
     const now = ctx.currentTime;
     const grains = opts.grains ?? 6;
 
+    // 粒の間隔（秒）。大きいほど「ゆっくり」擦れる感じになる
+    const gap = opts.gap ?? 0.17;
+
     for (let i = 0; i < grains; i++) {
-      const start = now + i * 0.075 + Math.random() * 0.025;
-      const dur = 0.05 + Math.random() * 0.05;
+      const start = now + i * gap + Math.random() * 0.04;
+      const dur = 0.08 + Math.random() * 0.06;
 
       const frames = Math.max(1, Math.ceil(ctx.sampleRate * dur));
       const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
