@@ -102,7 +102,12 @@ export function usePaperRustle() {
         src.start(start, offset, dur);
       }
     } catch {
-      // 演出音の失敗は無視する（呼び出し元の主処理は継続させる）
+      // 演出音の失敗は無視する（呼び出し元の主処理は継続させる）。
+      // 失敗した状態を引きずらないよう共有資源を破棄し、次回の再生で
+      // 作り直して自己回復できるようにする。
+      sharedCtx = null;
+      sharedMaster = null;
+      sharedNoise = null;
     }
   }, []);
 }
