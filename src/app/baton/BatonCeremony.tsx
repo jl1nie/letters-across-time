@@ -179,7 +179,7 @@ export function BatonCeremony({
                         repeat: Infinity,
                       }
                 }
-                className="absolute z-0 outline-none"
+                className="absolute z-0 rounded-[2rem] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--c-ribbon)] focus-visible:ring-offset-2"
               >
                 <Parcel />
               </motion.button>
