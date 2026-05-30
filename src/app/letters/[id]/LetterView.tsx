@@ -26,8 +26,8 @@ function Bubble({
       transition={{ duration: 1.0, ease: "easeOut" }}
       className={
         from === "me"
-          ? "self-end max-w-[80%] text-[14px] leading-[2] px-4 py-3 rounded-2xl border border-[color:var(--rule)]"
-          : "self-start max-w-[85%] text-[14px] leading-[2] px-4 py-3 rounded-2xl bg-[#efe9da]"
+          ? "self-end max-w-[80%] text-[14px] leading-[2] whitespace-pre-wrap px-4 py-3 rounded-2xl border border-[color:var(--rule)]"
+          : "self-start max-w-[85%] text-[14px] leading-[2] whitespace-pre-wrap px-4 py-3 rounded-2xl bg-[#efe9da]"
       }
     >
       {children}
@@ -138,7 +138,12 @@ function DialogueRequest({ letter }: { letter: Letter }) {
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    // IME変換確定のEnterで誤送信しないよう isComposing を見る
+                    if (
+                      e.key === "Enter" &&
+                      !e.shiftKey &&
+                      !e.nativeEvent.isComposing
+                    ) {
                       e.preventDefault();
                       if (reply.trim().length > 0) setReplied(true);
                     }
