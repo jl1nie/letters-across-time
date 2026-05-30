@@ -13,10 +13,13 @@ const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—"
 export function BatonClient() {
   const params = useSearchParams();
   const fromId = params.get("from");
+  const byId = params.get("by");
   const message = params.get("message");
   const experience = resolveBatonExperience(params.get("experience"));
 
+  // from = 紹介された人(B), by = 紹介してくれた人(A)
   const letter = fromId ? senpai.find((l) => l.id === fromId) : null;
+  const introducer = byId ? senpai.find((l) => l.id === byId) ?? null : null;
 
   if (!letter) {
     return (
@@ -35,7 +38,9 @@ export function BatonClient() {
   }
 
   if (experience === "ceremony") {
-    return <BatonCeremony letter={letter} message={message} />;
+    return (
+      <BatonCeremony letter={letter} message={message} introducer={introducer} />
+    );
   }
 
   return (
@@ -48,13 +53,20 @@ export function BatonClient() {
           className="mb-16"
         >
           <p className="text-xs tracking-[0.35em] text-[color:var(--muted)] mb-6">
-            バトンが届いています
+            バトンが届きました
           </p>
+          {introducer && (
+            <p className="text-sm leading-[2.2] text-[color:var(--muted)] mb-6">
+              {introducer.profile.occupation}・{introducer.profile.age}歳の方が、
+              <br />
+              この方を紹介してくれました。
+            </p>
+          )}
           <h1 className="text-[22px] font-light leading-[2.2] tracking-[0.05em] mb-10">
             {letter.profile.occupation}・{letter.profile.age}歳・
             {genderLabel[letter.profile.gender]}
             <br />
-            <span className="text-[color:var(--muted)]">のあの方と、話してみませんか。</span>
+            <span className="text-[color:var(--muted)]">のこの方と、話してみませんか。</span>
           </h1>
 
           {message && (
