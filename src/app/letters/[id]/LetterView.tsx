@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Envelope } from "@/components/Envelope";
@@ -51,13 +51,16 @@ function DialogueRequest({ letter }: { letter: Letter }) {
     : null;
 
   // 先輩の返事。手紙の判断や「その後」を踏まえた語りで、対話している感を出す。
-  const senpaiLines = [
-    "こんにちは。あなたのお話、受け取りました。",
-    letter.message.judgment === "good_job"
-      ? "わたしも同じところで、ずいぶん長く迷いました。だからこそ、声をかけたくなって。"
-      : "わたしの選択が正解だったとは、正直まだ言い切れません。それでも、回り道の話でよければ。",
-    `あのあと、${letter.message.afterwards}`,
-  ];
+  const senpaiLines = useMemo(
+    () => [
+      "こんにちは。あなたのお話、受け取りました。",
+      letter.message.judgment === "good_job"
+        ? "わたしも同じところで、ずいぶん長く迷いました。だからこそ、声をかけたくなって。"
+        : "わたしの選択が正解だったとは、正直まだ言い切れません。それでも、回り道の話でよければ。",
+      `あのあと、${letter.message.afterwards}`,
+    ],
+    [letter.message.judgment, letter.message.afterwards],
+  );
 
   // 対話に入ったら、先輩の返事を一つずつゆっくり表示する。
   useEffect(() => {
@@ -67,7 +70,7 @@ function DialogueRequest({ letter }: { letter: Letter }) {
       revealed === 0 ? 900 : 1700,
     );
     return () => clearTimeout(t);
-  }, [step, revealed, senpaiLines.length]);
+  }, [step, revealed, senpaiLines]);
 
   const conversationDone = revealed >= senpaiLines.length;
 
