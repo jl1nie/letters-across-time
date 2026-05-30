@@ -108,7 +108,7 @@ export default function ComposePage() {
                 placeholder="34"
                 className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-2xl py-3 text-center tracking-[0.2em]"
               />
-              <Forward enabled={!!age && age >= 18} onClick={next} />
+              <Forward enabled={!!age && age >= 18 && age <= 60} onClick={next} />
             </motion.section>
           )}
 

@@ -129,7 +129,7 @@ export function WriteClient() {
                 placeholder="36"
                 className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-2xl py-3 text-center tracking-[0.2em]"
               />
-              <Forward enabled={!!age && age >= 20} onClick={next} />
+              <Forward enabled={!!age && age >= 20 && age <= 70} onClick={next} />
             </motion.section>
           )}
 
