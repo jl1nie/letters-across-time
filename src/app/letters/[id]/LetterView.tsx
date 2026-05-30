@@ -137,7 +137,14 @@ function DialogueRequest({ letter }: { letter: Letter }) {
                 <textarea
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (reply.trim().length > 0) setReplied(true);
+                    }
+                  }}
                   rows={2}
+                  maxLength={100}
                   aria-label="先輩への返信"
                   placeholder="返したいことがあれば、ひとことだけ。"
                   className="w-full bg-transparent border-b border-[color:var(--rule)] focus:border-[color:var(--foreground)] outline-none text-sm py-2 resize-none leading-[2]"
