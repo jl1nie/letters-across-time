@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { senpai } from "@/data/senpai";
+import { useDisplayedAge } from "@/lib/useDisplayedAge";
 
 type OccCat =
   | "デザイン"
@@ -42,6 +43,7 @@ function BatonContext() {
   const params = useSearchParams();
   const batonId = params.get("baton");
   const letter = batonId ? senpai.find((l) => l.id === batonId) : null;
+  const shownAge = useDisplayedAge(letter?.id ?? "", letter?.profile.age ?? 0);
   if (!letter) return null;
   return (
     <motion.div
@@ -54,7 +56,7 @@ function BatonContext() {
         バトンを受け取ったあなたへ
       </p>
       <p className="text-sm leading-[2] text-[color:var(--muted)]">
-        {letter.profile.occupation}・{letter.profile.age}歳のあの方から。
+        {letter.profile.occupation}・{shownAge}歳のあの方から。
       </p>
     </motion.div>
   );

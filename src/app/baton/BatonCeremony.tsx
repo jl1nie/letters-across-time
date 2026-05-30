@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { Letter } from "@/data/senpai";
 import { usePaperRustle } from "@/lib/usePaperRustle";
+import { useDisplayedAge } from "@/lib/useDisplayedAge";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
 
@@ -30,6 +31,13 @@ export function BatonCeremony({
   const reduced = useReducedMotion();
   const playRustle = usePaperRustle();
   const [phase, setPhase] = useState<Phase>("wrapped");
+
+  // 一覧・詳細と同じ表示年齢に揃える（実年齢のままだと年齢がブレて見える）
+  const shownAge = useDisplayedAge(letter.id, letter.profile.age);
+  const introAge = useDisplayedAge(
+    introducer?.id ?? "",
+    introducer?.profile.age ?? 0,
+  );
 
   // 包みが開いたら、少し間をおいて手紙の内容を見せる（焦らせない）
   useEffect(() => {
@@ -103,8 +111,7 @@ export function BatonCeremony({
                 <Card>
                   {introducer && (
                     <p className="text-center text-xs tracking-[0.18em] text-[color:var(--c-muted)] leading-[2.2]">
-                      {introducer.profile.occupation}・
-                      {introducer.profile.age}歳の方が、
+                      {introducer.profile.occupation}・{introAge}歳の方が、
                       <br />
                       この方を紹介してくれました。
                     </p>
@@ -120,7 +127,7 @@ export function BatonCeremony({
                   </div>
 
                   <p className="mt-7 text-center text-sm tracking-[0.18em] text-[color:var(--c-muted)] leading-[2.2]">
-                    {letter.profile.occupation}・{letter.profile.age}歳・
+                    {letter.profile.occupation}・{shownAge}歳・
                     {genderLabel[letter.profile.gender]}
                   </p>
 

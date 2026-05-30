@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { senpai } from "@/data/senpai";
 import { LetterCard } from "@/components/LetterCard";
 import { resolveBatonExperience } from "@/lib/flags";
+import { useDisplayedAge } from "@/lib/useDisplayedAge";
 import { BatonCeremony } from "./BatonCeremony";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
@@ -20,6 +21,13 @@ export function BatonClient() {
   // from = 紹介された人(B), by = 紹介してくれた人(A)
   const letter = fromId ? senpai.find((l) => l.id === fromId) : null;
   const introducer = byId ? senpai.find((l) => l.id === byId) ?? null : null;
+
+  // 一覧・詳細と同じ表示年齢に揃える（hook は早期 return より前で呼ぶ）
+  const shownAge = useDisplayedAge(letter?.id ?? "", letter?.profile.age ?? 0);
+  const introAge = useDisplayedAge(
+    introducer?.id ?? "",
+    introducer?.profile.age ?? 0,
+  );
 
   if (!letter) {
     return (
@@ -57,13 +65,13 @@ export function BatonClient() {
           </p>
           {introducer && (
             <p className="text-sm leading-[2.2] text-[color:var(--muted)] mb-6">
-              {introducer.profile.occupation}・{introducer.profile.age}歳の方が、
+              {introducer.profile.occupation}・{introAge}歳の方が、
               <br />
               この方を紹介してくれました。
             </p>
           )}
           <h1 className="text-[22px] font-light leading-[2.2] tracking-[0.05em] mb-10">
-            {letter.profile.occupation}・{letter.profile.age}歳・
+            {letter.profile.occupation}・{shownAge}歳・
             {genderLabel[letter.profile.gender]}
             <br />
             <span className="text-[color:var(--muted)]">のこの方と、話してみませんか。</span>
@@ -90,7 +98,13 @@ export function BatonClient() {
           <p className="text-xs tracking-[0.3em] text-[color:var(--muted)] mb-8">
             この方の手紙
           </p>
-          <LetterCard letter={letter} index={0} />
+          <LetterCard
+            letter={{
+              ...letter,
+              profile: { ...letter.profile, age: shownAge },
+            }}
+            index={0}
+          />
         </motion.div>
 
         <motion.div
