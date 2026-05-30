@@ -8,6 +8,7 @@ import { Typewriter } from "@/components/Typewriter";
 import type { Letter } from "@/data/senpai";
 import { getIntroduction } from "@/data/introductions";
 import { displayedAge, getUserAge } from "@/lib/displayAge";
+import { usePaperRustle } from "@/lib/usePaperRustle";
 
 const genderLabel: Record<string, string> = { f: "女性", m: "男性", x: "—" };
 
@@ -127,6 +128,7 @@ export function LetterView({
   const [revealLetter, setRevealLetter] = useState(false);
   const [bodyDone, setBodyDone] = useState(false);
   const [shownAge, setShownAge] = useState<number>(letter.profile.age);
+  const playRustle = usePaperRustle();
 
   useEffect(() => {
     setShownAge(displayedAge(letter.id, getUserAge(letter.profile.age - 3)));
@@ -162,7 +164,13 @@ export function LetterView({
               {shownAge}歳・{letter.profile.occupation}・
               {genderLabel[letter.profile.gender]}
             </p>
-            <Envelope opened={opened} onOpen={() => setOpened(true)} />
+            <Envelope
+              opened={opened}
+              onOpen={() => {
+                playRustle();
+                setOpened(true);
+              }}
+            />
           </motion.div>
         ) : (
           <motion.article
